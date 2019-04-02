@@ -16,6 +16,7 @@ module ALUControl
 (
 	input [3:0] ALUOp,			// Viene asignado de ALUControl
 	input [5:0] ALUFunction,	// Viene directo de la ROM
+	output reg Jr,	//¿Porqué de tipo Reg?
 	output [3:0] ALUOperation
 
 );
@@ -29,6 +30,7 @@ localparam R_Type_ADD    = 10'b1111_100000;
 localparam R_Type_SUB	 = 10'b1111_100010; // Funct = 22H aquí corregí el Funct porque en simulación salia mal la resta  la ALU sacaba el valor 0 (por default)
 localparam R_Type_SLL	 = 10'b1111_000000; // Funct = 00H
 localparam R_Type_SRL	 = 10'b1111_000010; // Funct = 02H
+localparam R_Type_JR		 = 10'b1111_001000; // JR Funct = 08H
 
 localparam I_Type_ADDI   = 10'b0001_xxxxxx;
 localparam I_Type_ORI    = 10'b0010_xxxxxx;
@@ -40,6 +42,10 @@ localparam I_Type_LW		 = 10'b0110_xxxxxx;
 
 localparam I_Type_BEQ	 = 10'b0111_xxxxxx; // ALUOp = 7
 localparam I_Type_BNE	 = 10'b1000_xxxxxx; // ALUOp = 8
+
+//localparam J_Type_JUMP	 = 10'b1001_xxxxxx; // ALUOp = 9
+//localparam J_Type_JAL		 = 10'b1010_xxxxxx; // ALUOp = 10
+
 
 reg [3:0] ALUControlValues;
 wire [9:0] Selector;
@@ -65,9 +71,11 @@ always@(Selector)begin
 		
 		I_Type_BEQ:		ALUControlValues = 4'b0100;// Beq pone a restar ALU para poder compararlos
 		I_Type_BNE:		ALUControlValues = 4'b0100;// Bne pone a restar ALU para poder compararlos
+		
 		default: ALUControlValues = 4'b1001;
 	endcase
-end
+	Jr = (Selector==R_Type_JR)? 1'b1 : 1'b0;	// Bandera para selector de Mux
+end														// Es igual a 1 sólo en instrucción JR
 //
 
 assign ALUOperation = ALUControlValues;
